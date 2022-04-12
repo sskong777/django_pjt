@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load bootstrap5 %}
+
+{% block content %}
+
+{% if request.resolver_match.url_name == 'create' %}
+  <h1>CREATE</h1>
+{% elif request.resolver_match.url_name == 'update' %}
+  <h1>UPDATE</h1>
+{% endif %}
+<hr>
+
+<form action="" method="POST">
+  {% csrf_token %}
+  {% bootstrap_form form %}
+  {% comment %} {{ form.as_p }} {% endcomment %}
+  {% if request.resolver_match.url_name == 'create' %}
+    {% comment %} <button>글생성</button> {% endcomment %}
+    {% buttons submit='글생성' %}{% endbuttons %}
+  {% elif request.resolver_match.url_name == 'update' %}
+    {% comment %} <button>글수정</button> {% endcomment %}
+    {% buttons submit='글수정' %}{% endbuttons %}
+  {% endif %}
+</form>
+
+{% if request.resolver_match.url_name == 'update' %}
+  <a href="{% url 'articles:detail' article.pk %}">BACK</a>
+{% else %}
+  <a href="{% url 'articles:index' %}">BACK</a>
+{% endif %}
+
+{% endblock content %}

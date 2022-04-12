@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+
+  <h1>회원정보수정</h1>
+  <hr>
+  <form action="" method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" class="btn btn-info">
+    {% comment %} <button class="btn btn-info">SignUp</button> {% endcomment %}
+  </form>
+  <a class="btn btn-primary mt-2" href="{% url 'articles:index' %}">back</a>
+
+  {% endblock content %}
