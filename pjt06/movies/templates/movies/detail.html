@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h1>DETAIL</h1>
+<hr>
+<div class="card" style="width: 18rem;">
+  {% if movie.poster_url %}
+    <img src="{{ movie.poster_url.url }}" class="card-img-top" alt="{{ movie.poster_url }}">
+  {% endif %}
+  <div class="card-body">
+    <h5 class="card-title">{{ moive.title }}</h5>
+    <p class="card-text">Audience : {{ movie.audience }}</p>
+    <p class="card-text">Release Dates : {{ movie.release_date }}</p>
+    <p class="card-text">Genre : {{ movie.genre }}</p>
+    <p class="card-text">Score : {{ movie.score}}</p>
+    <p class="card-text">{{ movie.description }}</p>
+    
+    <div class='d-flex'>
+      <a href="{% url 'movies:update' movie.pk %}" class="btn btn-info">UPDATE</a>
+      <form action="{% url 'movies:delete' movie.pk %}" method='POST'>
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger ms-2">
+          DELETE
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+<a href="{% url 'movies:index' %}" class="btn btn-warning">BACK</a>
+{% endblock content %}
+
