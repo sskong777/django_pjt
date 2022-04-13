@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% comment %} {% load bootstrap5 %} {% endcomment %}
+
+{% block content %}
+  <h1>DETAIL</h1>
+  <h3>{{ article.pk }}번째 글</h3>
+  <hr>
+  <p>제목 : {{ article.title }}</p>
+  <p>내용 : {{ article.content }}</p>
+  <p>작성 시각 : {{ article.created_at }}</p>
+  <p>수정 시각 : {{ article.updated_at }}</p>
+  <hr>
+  <div class="d-flex my-2">
+    <a class="btn btn-primary me-2" href="{% url 'articles:update' article.pk %}">수정</a>
+    <form action="{% url 'articles:delete' article.pk %}" method="POST">
+      {% csrf_token %}
+      <input type="submit" value="삭제"class="btn btn-danger" >
+    </form>
+  </div>
+  <a class="btn btn-secondary" href="{% url 'articles:index' %}">back</a>
+  <!--댓글 목록-->
+  <hr>
+  <h4>댓글 목록</h4>
+  {% if comments %}
+    <p><b>{{ comments | length }}개의 댓글이 있습니다.</b></p>
+  {% endif %}
+  <ul>
+    {% for comment in comments %}
+      <li> 
+        {{ comment }} 
+        <form action="{% url 'articles:comments_delete' article.pk comment.pk%}" method='POST' class="d-inline">
+          {% csrf_token %}
+          <button class='btn btn-danger btn-sm my-2'>댓글 삭제</button>
+        </form>
+      </li>
+    {% empty %}
+      <p>댓글이 없어요..</p>
+    {% endfor %}
+  </ul>
+
+  <hr>
+  <!--댓글 작성-->
+  <form action="{% url 'articles:comments_create' article.pk %}" method="POST">
+    {% csrf_token %}
+    {{ comment_form}}
+    {% comment %} {% bootstrap_form comment_form %} {% endcomment %}
+    <button class="btn btn-primary btn-sm">댓글작성</button>
+  </form>
+
+{% endblock content %}
