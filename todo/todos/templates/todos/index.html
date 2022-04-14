@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>INDEX</h1>
+<a href="{% url 'todos:new' %}">New</a>
+<hr>
+
+{% for todo in todos %}
+    <h2>{{ todo.title }}</h2>
+    <p>작성자 : {{ todo.author.username}} <br></p>
+    <p>완료여부 : {{ todo.completed}}</p>
+<hr>
+{% endfor %}
+{% endblock content %}
+
