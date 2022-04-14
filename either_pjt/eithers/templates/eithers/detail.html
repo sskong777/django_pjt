@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load bootstrap5 %}
+{% block content %}
+<h1>DETAIL</h1>
+<a class='btn btn-primary' href="{% url 'eithers:index' %}">Back</a>
+<hr>
+
+<h1 class='d-flex justify-content-center'>{{ either.title }}</h1>
+
+
+<div class="d-flex justify-content-between">
+    <h4 class='text-danger'>{{ either.issue_a }} </h4>
+    <h4 class='text-primary'>{{ either.issue_b }} </h4>
+</div>
+
+<div class="progress">
+    <div class="progress-bar bg-danger progress-bar-striped" role="progressbar" style="width: {{red_per}}%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100">{{red_per}}</div>
+    <div class="progress-bar bg-primary progress-bar-striped" role="progressbar" style="width: {{blue_per}}%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">{{blue_per}}</div>
+  </div>
+
+<h4>댓글 작성</h4>
+<form action="{% url 'eithers:comment_create' either.pk %}" method='POST'>
+    {% csrf_token %}
+    {% comment %} {{ form.as_p}} {% endcomment %}
+    {% bootstrap_form form %}
+    <button class='btn btn-warning'>작성</button> 
+</form>
+<hr>
+<h4>댓글 목록</h4>
+{% for comment in comments %}
+    {% if comment.pick == 'red' %}
+        <div class="alert alert-danger" role="alert">
+            {{ comment.content }}
+        </div>
+    {% else %}
+        <div class="alert alert-primary" role="alert">
+            {{ comment.content }}
+        </div>
+    {% endif %}
+    {% comment %} <p> {{ comment.content }}</p>
+    <p> {{ comment.pick }} </p> {% endcomment %}
+{% endfor %}
+{% endblock content %}
+

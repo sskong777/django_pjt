@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load bootstrap5 %}
+
+{% block content %}
+<h1>CREATE</h1>
+<form action="{% url 'eithers:create' %}" method='POST'>
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button class='btn btn-info'>생성하기</button>
+</form>
+<hr>
+<a class='btn btn-primary' href="{% url 'eithers:index' %}">back</a>
+{% endblock content %}
+
