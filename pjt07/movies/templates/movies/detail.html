@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h1>DETAIL</h1>
+  <hr>
+  <p>{{movie.title}}</p>
+  <p>{{movie.description}}</p>
+  
+  <hr>
+  <a class="btn btn-info mb-2" href="{% url 'movies:update' movie.pk %}">UPDATE</a>
+  <form action="{% url 'movies:delete' movie.pk %}" method="POST">
+    {% csrf_token %}
+    <button class="btn btn-danger">DELETE</button>
+  </form>
+  <a href="{% url 'movies:index' %}">Back</a>
+  <hr>
+  {% comment %} 댓글주석 {% endcomment %}
+  <ul>
+    {% for comment in comments %}
+      <li>
+        {{ comment.content }}
+        {% if request.user == comment.user %}
+          <form action="{% url 'movies:comments_delete' movie.pk comment.pk %}" method='POST'>
+            {% csrf_token %}
+            <button>DELETE</button>
+          </form>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+  {% if request.user.is_authenticated %}
+  <form action="{% url 'movies:comments_create' movie.pk %}" method='POST'>
+    {% csrf_token %}
+    {{ comment_form.as_p }}
+    <input type="submit" value='제출'>
+  </form>
+  {% else %}
+  <a href="{% url 'accounts:login' %}">댓글은 로그인 후 사용가능!</a>
+  {% endif %}
+
+  
+</div>
+{% endblock content %}
