@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>{{ person.username }}의 프로필 페이지</h1>
+  {% with followings=person.followings.all followers=person.followers.all %}
+    <div>
+      <div>
+        팔로잉 수 : 
+          <span id="following-count-{{ person.pk }}">
+          {{ followings|length }}
+          </span> 
+        /
+        팔로워 수 :
+        <span id="follower-count-{{ person.pk }}">
+          {{ followers|length }}
+          </span> 
+    </div>
+    {% if user != person %}
+      <div>
+        <form class='follow-form' data-person-id="{{ person.pk }}" action="{% url 'accounts:follow' person.pk %}" method="POST">
+          {% csrf_token %}
+          {% if user in followers %}
+            <!-- <input type="submit" value="언팔로우"> -->
+            <button id="follow-{{ person.pk }}">언팔로우</button>
+          {% else %}
+            <!-- <input type="submit" value="팔로우"> -->
+            <button id="follow-{{ person.pk }}">팔로우</button>
+            {% endif %}
+        </form>
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <hr>
+
+  <h2>{{ person.username }}가 작성한 게시글</h2>
+  {% for article in person.article_set.all %}
+    <div>{{ article.title }}</div>
+  {% endfor %}
+
+  <hr>
+
+  <h2>{{ person.username }}가 작성한 댓글</h2>
+  {% for comment in person.comment_set.all %}
+    <div>{{ comment.content }}</div>
+  {% endfor %}
+
+  <hr>
+
+  <h2>{{ person.username }}가 좋아요를 누른 게시글</h2>
+  {% for article in person.like_articles.all %}
+    <div>{{ article.title }}</div>
+  {% endfor %}
+
+  <a href="{% url 'articles:index' %}">[back]</a>
+  
+{% endblock content %}
+
+{% block script %}
+<script>
+    // 2-3-2. 페이지에 있는 {% csrf_token %} 값을 찾아서 사용하는 방법
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+
+    // 2-4. 확보한 csrf token 정보를 axios header에 추가하기 위해 config 값을 object형태로 만들어 준다.
+    const csrfConfig = {
+      headers: {'X-CSRFToken': csrftoken},
+    }
+  // CODE HERE
+  const followForm = document.querySelector('.follow-form')
+  // console.log(followForm)
+  followForm.addEventListener('submit',function(event){
+    event.preventDefault()
+    const personPk = this.dataset.personId
+    // console.log(personPk)
+    const FollowURL = `/accounts/${personPk}/follow/`
+
+    axios.post(FollowURL,null,csrfConfig)
+    .then(function(res){
+      // console.log(res.data)
+      return res.data
+    })
+    .then(function(res){
+      const followBtn = document.querySelector(`#follow-${personPk}`)
+      const followingsCtn = document.querySelector(`#following-count-${personPk}`)
+      const followersCtn = document.querySelector(`#follower-count-${personPk}`)
+
+      // console.log(followBtn)
+      if (res.followed){
+        followBtn.innerText = '언 팔로우!'
+        followBtn.setAttribute('class','btn btn-danger')
+      }else{
+        followBtn.innerText = '팔로우!'
+        followBtn.setAttribute('class','btn btn-primary')
+        
+      }
+      followersCtn.innerText = res.follower_cnt
+      followingsCtn.innerText = res.following_cnt
+
+    })
+  })
+</script>
+{% endblock script %}

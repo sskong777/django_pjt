@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Articles</h1>
+{% if request.user.is_authenticated %}
+<a href="{% url 'articles:create' %}">[CREATE]</a>
+{% else %}
+<a href="{% url 'accounts:login' %}">[새 글을 작성하려면 로그인하세요.]</a>
+{% endif %}
+<hr>
+{% for article in articles %}
+<p>작성자 :
+  <a href="{% url 'accounts:profile' article.user.username %}">{{ article.user }}</a>
+</p>
+<p>글 번호 : {{ article.pk }}</p>
+<p>글 제목 : {{ article.title }}</p>
+<p>글 내용 : {{ article.content }}</p>
+<div>
+  <form action="{% url 'articles:likes' article.pk %}" method='POST' class="like-form"
+    data-article-id="{{ article.pk }}">
+    {% csrf_token %}
+    {% if user in article.like_users.all %}
+    <button id="like-{{ article.pk }}">좋아요 취소</button>
+    {% else %}
+    <button id="like-{{ article.pk }}">좋아요</button>
+    {% endif %}
+  </form>
+  <p>
+    <span id="like-count-{{ article.pk }}">
+      {{ article.like_users.all|length }}
+    </span>
+    명이 이 글을 좋아합니다.
+  </p>
+</div>
+<a href="{% url 'articles:detail' article.pk %}">[DETAIL]</a>
+<hr>
+{% endfor %}
+{% endblock content %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+  // CODE HERE
+  // csrf token 확보
+  // 1. cookie에 있는 token을 가져오는 방법
+  // function getCookie(name) {
+  //   let cookieValue = null;
+  //   if (document.cookie && document.cookie !== '') {
+  //     const cookies = document.cookie.split(';');
+  //     for (let i = 0; i < cookies.length; i++) {
+  //       const cookie = cookies[i].trim();
+  //       // Does this cookie string begin with the name we want?
+  //       if (cookie.substring(0, name.length + 1) === (name + '=')) {
+  //         cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+  //         break;
+  //       }
+  //     }
+  //   }
+  //   return cookieValue;
+  // }
+  // const csrftoken = getCookie('csrftoken');
+
+  // 2. csrf 토큰의 값을 속성선택자로 가져온다.
+  const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+
+  // 확보한 csrf 토큰 정보를 axios header에 추가한다. config값을 object형태로 만들어준다.
+  const config = {
+    headers: { 'X-CSRFToken': csrftoken },
+  }
+
+  // 버튼을 눌렀을 때 페이지의 새로 고침이 되지 않게
+  // like를 담당하는 form을 선택한다.
+  const likeForms = document.querySelectorAll('.like-form')
+  // 각 form에 eventListner를 추가한다.
+  likeForms.forEach(form => {
+    form.addEventListener('submit', function (event) {
+      event.preventDefault()
+      // pk정보 가져오기
+      const articlePk = this.dataset.articleId
+      // pk정보를 이용하여 요청 url 만들기
+      const LIKE_URL = `/articles/${articlePk}/likes/`
+      // console.log(LIKE_URL)
+
+      // csrf 헤더 설정을 config 인자에 전달해준다.
+      axios.post(LIKE_URL, null, config)
+        .then(function (res) {
+          // 3. Views.py에서 작성한다 (server에서 응답으로 보내주는 데이터를 새롭게 
+          // 수정하기 위해서)
+          // console.log(res.data)
+          return res.data
+        })
+        .then(function (res) {
+          const likeBtn = document.querySelector(`#like-${articlePk}`)
+          const likeCtn = document.querySelector(`#like-count-${articlePk}`)
+          // 4-2
+          if (res.liked) {
+            likeBtn.innerText = '좋아요 취소'
+          } else {
+            likeBtn.innerText = '좋아요'
+          }
+          likeCtn.innerText = res.like_cnt
+        })
+        // 4. 필요한 데이터가 날라오면 해당 데이터로 DOM 조작을 해준다!
+
+        .catch(function (err) {
+          console.log(err)
+        })
+      })
+    })
+
+
+</script>
+{% endblock script %}
